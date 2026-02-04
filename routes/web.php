@@ -66,7 +66,7 @@ Route::get('/email/verify/{id}/{hash}', function ($id, $hash) {
 })->middleware('signed')->name('verification.verify');
 
 
-Route::controller(CategoryController::class)->prefix('category')->group(function () {
+Route::controller(CategoryController::class)->middleware('auth')->prefix('category')->group(function () {
     Route::get('/', 'index')->name('category.index');
     Route::post('/add', 'store')->name('category.store');
     Route::get('/edit/{id}', 'edit')->name('category.edit');
