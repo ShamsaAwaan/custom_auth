@@ -109,12 +109,12 @@
     <script src="{{ asset('assets/vendor/libs/apex-charts/apexcharts.js') }}"></script>
     <script src="{{ asset('assets/vendor/libs/swiper/swiper.js') }}"></script>
     <script src="{{ asset('assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js') }}"></script>
-
     <!-- Main JS -->
-
     <script src="{{ asset('assets/js/main.js') }}"></script>
-
     <!-- Page JS -->
     <script src="{{ asset('assets/js/dashboards-analytics.js') }}"></script>
+
+    @yield('scripts')
+
   </body>
 </html>

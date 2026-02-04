@@ -67,3 +67,9 @@ Route::get('/email/verify/{id}/{hash}', function ($id, $hash) {
         ->with('success', 'Email verified successfully! You can now login.');
 
 })->middleware('signed')->name('verification.verify');
+
+
+
+Route::get('/category', function () {
+    return view('category.index');
+})->name('category.index');
