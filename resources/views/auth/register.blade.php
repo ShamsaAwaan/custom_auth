@@ -97,8 +97,8 @@
                 <span class="text-danger">{{ $message }}</span>
               @enderror
           </div>
-          
-          
+
+
           <div class="mb-6 form-password-toggle form-control-validation">
             <label class="form-label" for="password">Password <span class="text-danger">*</span></label>
             <div class="input-group input-group-merge">

@@ -481,11 +481,19 @@
                         <i class="icon-base ti tabler-user me-3 icon-md"></i
                         ><span class="align-middle">My Profile</span>
                       </a>
+
+                         <i class="ri-settings-3-line"></i>
+                         <span>profile</span>
+                         </a>
+
                     </li>
                     <li>
                       <a class="dropdown-item" href="pages-account-settings-account.html">
-                        <i class="icon-base ti tabler-settings me-3 icon-md"></i
-                        ><span class="align-middle">Settings</span>
+                        <i class="icon-base ti tabler-settings me-3 icon-md"></i>
+                        <span class="align-middle">Settings</span>
+
+</a>
+
                       </a>
                     </li>
                     <li>

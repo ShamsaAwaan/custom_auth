@@ -23,6 +23,7 @@
 
 
         @include('layout.partials.side-bar')
+        @include('layout.partials.tables')
 
 
 

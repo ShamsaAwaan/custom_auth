@@ -48,16 +48,25 @@
             <h4 class="mb-1">Welcome to Vuexy! 👋</h4>
             <p class="mb-6">Please sign-in to your account and start the adventure</p>
 
-            <form id="formAuthentication" class="mb-4" action="index.html" method="GET">
+    <div class="alert alert-danger text-center mb-4">
+        {{ session('error') }}
+    </div>
+
+
+            <form action="{{ route('login.submit') }}" method="POST">
+    @csrf
+
               <div class="mb-6 form-control-validation">
                 <label for="email" class="form-label">Email or Username</label>
                 <input
-                  type="text"
-                  class="form-control"
-                  id="email"
-                  name="email-username"
-                  placeholder="Enter your email or username"
-                  autofocus />
+  type="email"
+  class="form-control"
+  id="email"
+  name="email"
+  placeholder="Enter your email"
+  required
+  autofocus />
+
               </div>
               <div class="mb-6 form-password-toggle form-control-validation">
                 <label class="form-label" for="password">Password</label>
@@ -76,7 +85,14 @@
                 <div class="d-flex justify-content-between">
                   <div class="form-check mb-0 ms-2">
                     <input class="form-check-input" type="checkbox" id="remember-me" />
+
                     <label class="form-check-label" for="remember-me"> Remember Me </label>
+                    <input
+  class="form-check-input"
+  type="checkbox"
+  id="remember-me"
+  name="remember" />
+
                   </div>
                   <a href="{{ route('forgot') }}">
                     <p class="mb-0">Forgot Password?</p>

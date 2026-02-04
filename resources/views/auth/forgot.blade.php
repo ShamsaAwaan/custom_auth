@@ -46,17 +46,31 @@
           <!-- /Logo -->
           <h4 class="mb-1">Adventure starts here 🚀</h4>
           <p class="mb-6">Make your app management easy and fun!</p>
-  
-          <form id="formAuthentication" class="mb-6" action="index.html" method="GET">
-            
-            
+          @if (session('error'))
+    <div class="alert alert-danger text-center mb-4">
+        {{ session('error') }}
+    </div>
+@endif
+
+@if (session('success'))
+    <div class="alert alert-success text-center mb-4">
+        {{ session('success') }}
+    </div>
+@endif
+
+       <form id="formAuthentication" class="mb-6" action="{{ route('password.email') }}" method="POST">
+    @csrf
+
+
+
             <div class="mb-6 form-control-validation">
               <label for="email" class="form-label">Email</label>
               <input type="text" class="form-control" id="email" name="email" placeholder="Enter your email" />
             </div>
-              <button class="btn btn-primary d-grid w-100">Send Reset Link</button>
+              <button class="btn btn-primary d-grid w-100"  action="{{ route('password.update') }}">Send Reset Link</button>
+
           </form>
-  
+
           <p class="text-center">
             <span>Already have an account?</span>
             <a href="{{ route('login') }}">
