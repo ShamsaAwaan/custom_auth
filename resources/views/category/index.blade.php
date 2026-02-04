@@ -1,6 +1,13 @@
 @extends('layout.master')
 @section('content')
 <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title">Category List</h5>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCategoryModal" id="addCategoryButton">
+            <i class="icon-base ti tabler-plus"></i>
+            Create Category
+          </button>
+    </div>
     {{-- @dd('hello am here') --}}
     <div class="card-datatable table-responsive pt-0">
       <table class="datatables-basic table" id="category-table">
@@ -39,6 +46,54 @@
       </table>
     </div>
   </div>
+
+
+
+
+
+
+      <!-- Modal -->
+      <div class="modal fade" id="addCategoryModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="addCategoryModalTitle">Add Category</h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <div class="row g-4">
+                <div class="col mb-4">
+                  <label for="categoryName" class="form-label">Category Name</label>
+                  <input
+                    type="text"
+                    id="categoryName"
+                    class="form-control"
+                    placeholder="Enter Name" />
+                </div>
+              </div>
+              <div class="row g-4">
+                <div class="col mb-0">
+                    <div class="form-check form-switch mb-4">
+                        <input class="form-check-input" type="checkbox" id="categoryStatus" checked />
+                        <label class="form-check-label" for="categoryStatus"
+                          >Active</label
+                        >
+                      </div>
+                </div>
+              </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+                Close
+              </button>
+              <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+          </div>
+        </div>
+      </div>
 @endsection
 
 @section('scripts')
