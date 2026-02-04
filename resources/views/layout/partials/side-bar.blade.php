@@ -85,7 +85,7 @@
               <ul class="menu-sub">
                 <li class="menu-item">
                     <li class="menu-item">
-                        <a href="" class="menu-link">
+                        <a href="{{ route('category.index') }}" class="menu-link">
                           <div data-i18n="Category">Category</div>
                         </a>
                       </li>

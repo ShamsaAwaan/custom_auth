@@ -8,40 +8,21 @@
             Create Category
           </button>
     </div>
-    {{-- @dd('hello am here') --}}
     <div class="card-datatable table-responsive pt-0">
       <table class="datatables-basic table" id="category-table">
         <thead>
           <tr>
-            <th>ID</th>
+            <th>#</th>
             <th>Name</th>
             <th>Slug</th>
+            <th>Status</th>
             <th>Created At</th>
             <th>Updated At</th>
             <th>Action</th>
           </tr>
         </thead>
-        <tbody>
-            @for ($i = 1; $i <= 100; $i++)
-            <tr>
-                <td>{{ $i }}</td>
-                <td>Category {{ $i }}</td>
-                <td>category-{{ $i }}-slug</td>
-                <td>2026-01-{{ $i }}</td>
-                <td>2026-01-{{ $i }}</td>
-                <td>
-                    <div class="dropdown">
-                        <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                          <i class="icon-base ti tabler-dots-vertical"></i>
-                        </button>
-                        <div class="dropdown-menu">
-                          <a class="dropdown-item waves-effect" href="javascript:void(0);"><i class="icon-base ti tabler-pencil me-1"></i> Edit</a>
-                          <a class="dropdown-item waves-effect" href="javascript:void(0);"><i class="icon-base ti tabler-trash me-1"></i> Delete</a>
-                        </div>
-                      </div>
-                </td>
-            </tr>
-            @endfor
+        <tbody id="category-table-body">
+           @include('category.data-table')
         </tbody>
       </table>
     </div>
@@ -62,17 +43,17 @@
             </div>
             <div class="modal-body">
               <div class="mb-4">
-                <label for="categoryName" class="form-label">Category Name</label>
+                <label for="categoryName" class="form-label" required>Category Name</label>
                 <input type="text" id="categoryName" class="form-control" placeholder="Enter category name" />
               </div>
               <div class="form-check form-switch">
-                <input class="form-check-input" type="checkbox" id="categoryStatus" checked />
+                <input class="form-check-input" type="checkbox" id="categoryStatus" checked required />
                 <label class="form-check-label" for="categoryStatus">Active</label>
               </div>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Close</button>
-              <button type="button" class="btn btn-primary">Save changes</button>
+              <button type="button" class="btn btn-primary" id="saveCategoryButton">Save</button>
             </div>
           </div>
         </div>
@@ -83,6 +64,36 @@
 <script>
     $(document).ready(function() {
         $('#category-table').DataTable();
+        $('#saveCategoryButton').click(function(event) {
+            event.preventDefault();
+            var categoryName = $('#categoryName').val();
+            var categoryStatus = $('#categoryStatus').is(':checked') ? 1 : 0;
+            var csrfToken = $('meta[name="csrf-token"]').attr('content');
+            $.ajax({
+                url: '{{ route('category.store') }}',
+                type: 'POST',
+                data: {
+                    name: categoryName,
+                    is_active: categoryStatus,
+                    _token: csrfToken
+                },
+                success: function(response) {
+                    if (response.success) {
+                        $('#addCategoryModal').modal('hide');
+                        // toastr.success(response.message);
+                        $('#categoryName').val('');
+                        $('#categoryStatus').prop('checked', true);
+                        $('#category-table-body').html('');
+                        $('#category-table-body').html(response.html);
+                    } else {
+                        // toastr.error(response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.log(xhr.responseText);
+                }
+            });
+        });
     });
 </script>
 @endsection

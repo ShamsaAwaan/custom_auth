@@ -1,12 +1,9 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Auth\AuthController;
-
-
-
-
 use App\Models\User;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\Auth\AuthController;
 
 // ----------------------
 // Public routes
@@ -69,7 +66,9 @@ Route::get('/email/verify/{id}/{hash}', function ($id, $hash) {
 })->middleware('signed')->name('verification.verify');
 
 
-
-Route::get('/category', function () {
-    return view('category.index');
-})->name('category.index');
+Route::controller(CategoryController::class)->prefix('category')->group(function () {
+    Route::get('/', 'index')->name('category.index');
+    Route::post('/add', 'store')->name('category.store');
+    Route::get('/edit/{id}', 'edit')->name('category.edit');
+    Route::delete('/delete/{id}', 'delete')->name('category.delete');
+});
