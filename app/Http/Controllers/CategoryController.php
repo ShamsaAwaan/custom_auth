@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\Controller;
+use App\Models\Category;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class CategoryController extends Controller
 {
@@ -37,6 +38,6 @@ class CategoryController extends Controller
             if ($html == null) {
                 $html = view('category.data-table', compact('categories'))->render();
             }
-            return response()->json(['success' => $success, 'message' => $message, 'html' => $html]);   
+            return response()->json(['success' => $success, 'message' => $message, 'html' => $html]);
     }
 }
