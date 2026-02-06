@@ -8,6 +8,8 @@
   data-bs-theme="light"
   data-assets-path=""
   data-template="vertical-menu-template">
+  <head><meta name="csrf-token" content="{{ csrf_token() }}">
+</head>
 
   @include('layout.partials.header')
 

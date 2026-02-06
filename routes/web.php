@@ -1,74 +1,63 @@
 <?php
 
-use App\Models\User;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\CategoryController;
+use App\Models\User;
 
 // ----------------------
-// Public routes
+// Public Routes
 // ----------------------
-
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
-Route::get('/register', [AuthController::class, 'register'])->name('register');
-Route::post('/register', [AuthController::class, 'store'])->name('register.store');
 
-Route::get('/login', [AuthController::class, 'login'])
-    ->middleware('guest')
-    ->name('login');
+// Auth Routes (Guest Only)
+Route::middleware('guest')->group(function () {
 
-Route::post('/login', [AuthController::class, 'loginSubmit'])
-    ->middleware('guest')
-    ->name('login.submit');
+    // Register
+    Route::get('/register', [AuthController::class, 'register'])->name('register');
+    Route::post('/register', [AuthController::class, 'store'])->name('register.store');
 
-Route::get('/forgot', [AuthController::class, 'forgot'])
-    ->middleware('guest')
-    ->name('forgot');
+    // Login
+    Route::get('/login', [AuthController::class, 'login'])->name('login');
+    Route::post('/login', [AuthController::class, 'loginSubmit'])->name('login.submit');
 
+    // Forgot Password
+    Route::get('/forgot', [AuthController::class, 'forgot'])->name('forgot');
+    Route::post('/forgot', [AuthController::class, 'sendResetLink'])->name('password.email');
 
-
-Route::get('/forgot', [AuthController::class, 'forgot'])->name('forgot');
-Route::post('/forgot', [AuthController::class, 'sendResetLink'])->name('password.email');
-
-Route::get('/reset-password/{token}', [AuthController::class, 'resetForm'])->name('password.reset');
-Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
-
-Route::get('/profile', [AuthController::class, 'profile'])->name('profile');
+    // Reset Password
+    Route::get('/reset-password/{token}', [AuthController::class, 'resetForm'])->name('password.reset');
+    Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
+});
 
 // ----------------------
-// Email verification
+// Email Verification
 // ----------------------
+Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])
+    ->middleware('signed')
+    ->name('verification.verify');
 
-Route::get('/email/verify/{id}/{hash}', function ($id, $hash) {
+// ----------------------
+// Protected Routes (Auth Only)
+// ----------------------
+Route::middleware('auth')->group(function () {
 
-    $user = User::findOrFail($id);
+    // User Profile
+    Route::get('/profile', [AuthController::class, 'profile'])->name('profile');
 
-    // verify hash
-    if (! hash_equals(
-        sha1($user->getEmailForVerification()),
-        $hash
-    )) {
-        abort(403, 'Invalid verification link');
-    }
+    // Category CRUD (prefix + group)
+    Route::prefix('category')->group(function () {
 
-    // verify + activate
-    if (is_null($user->email_verified_at)) {
-        $user->email_verified_at = now();
-        $user->is_active = true;
-        $user->save();
-    }
+        Route::get('/', [CategoryController::class, 'index'])->name('category.index');
 
-    return redirect()->route('login')
-        ->with('success', 'Email verified successfully! You can now login.');
+        Route::post('/store', [CategoryController::class, 'store'])->name('category.store');
 
-})->middleware('signed')->name('verification.verify');
+        Route::get('/edit/{id}', [CategoryController::class, 'edit'])->name('category.edit');
 
+        Route::post('/update/{id}', [CategoryController::class, 'update'])->name('category.update');
 
-Route::controller(CategoryController::class)->middleware('auth')->prefix('category')->group(function () {
-    Route::get('/', 'index')->name('category.index');
-    Route::post('/add', 'store')->name('category.store');
-    Route::get('/edit/{id}', 'edit')->name('category.edit');
-    Route::delete('/delete/{id}', 'delete')->name('category.delete');
+        Route::delete('/delete/{id}', [CategoryController::class, 'destroy'])->name('category.delete');
+    });
 });

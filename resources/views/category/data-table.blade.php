@@ -17,8 +17,16 @@
             <i class="icon-base ti tabler-dots-vertical"></i>
             </button>
             <div class="dropdown-menu">
-            <a class="dropdown-item waves-effect" href="{{ route('category.edit', $category->id) }}"><i class="icon-base ti tabler-pencil me-1"></i> Edit</a>
-            <a class="dropdown-item waves-effect" href="{{ route('category.delete', $category->id) }}"><i class="icon-base ti tabler-trash me-1"></i> Delete</a>
+<button
+    type="button"
+    class="dropdown-item editBtn"
+    data-id="{{ $category->id }}">
+    <i class="icon-base ti tabler-pencil me-1"></i> Edit
+</button>
+<button class="dropdown-item deleteBtn"
+    data-id="{{ $category->id }}">
+    <i class="icon-base ti tabler-trash me-1"></i> Delete
+</button>
             </div>
         </div>
     </td>

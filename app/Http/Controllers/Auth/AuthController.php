@@ -6,11 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-  use Illuminate\Support\Facades\Hash;
-  use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 
 class AuthController extends Controller
 {
+    // -------------------------
+    // SHOW PAGES
+    // -------------------------
     public function register()
     {
         return view('auth.register');
@@ -26,6 +29,16 @@ class AuthController extends Controller
         return view('auth.forgot');
     }
 
+    public function resetForm(string $token)
+    {
+        return view('auth.reset-password', ['token' => $token]);
+    }
+
+    public function profile()
+    {
+        return view('auth.profile');
+    }
+
     // -------------------------
     // REGISTER
     // -------------------------
@@ -39,15 +52,13 @@ class AuthController extends Controller
             'password'   => 'required|string|min:8|confirmed',
         ]);
 
-        // force defaults
+        $validated['password'] = Hash::make($validated['password']);
         $validated['is_active'] = false;
         $validated['email_verified_at'] = null;
 
         $user = User::create($validated);
 
-
-
-        // ✅ sirf verification email
+        // Send verification email
         $user->sendEmailVerificationNotification();
 
         return redirect()->route('login')
@@ -57,88 +68,95 @@ class AuthController extends Controller
     // -------------------------
     // LOGIN
     // -------------------------
-  // ✅ add this at top
+    public function loginSubmit(Request $request)
+    {
+        $request->validate([
+            'email'    => 'required|email',
+            'password' => 'required|string',
+        ]);
 
-public function loginSubmit(Request $request)
-{
-    $request->validate([
-        'email'    => 'required|email',
-        'password' => 'required|string',
-    ]);
+        $user = User::where('email', $request->email)->first();
 
-    // 1️⃣ check user exists
-    $user = User::where('email', $request->email)->first();
+        if (!$user) {
+            return back()->with('error', 'This email is not registered. Please create an account.');
+        }
 
-    if (!$user) {
-        return back()->with('error', 'This email is not registered. Please create an account.');
+        if (!Auth::attempt(['email' => $request->email, 'password' => $request->password], $request->remember)) {
+            return back()->with('error', 'Invalid email or password.');
+        }
+
+        // Email verification check
+        if (!$user->hasVerifiedEmail()) {
+            Auth::logout();
+            return back()->with('error', 'Please verify your email before login.');
+        }
+
+        return redirect()->route('home')
+            ->with('success', 'Login successful!');
     }
 
-    // 2️⃣ attempt login
-    if (!Auth::attempt(
-        ['email' => $request->email, 'password' => $request->password],
-        $request->remember
-    )) {
-        return back()->with('error', 'Invalid email or password.');
-    }
+    // -------------------------
+    // EMAIL VERIFICATION
+    // -------------------------
+    public function verifyEmail($id, $hash)
+    {
+        $user = User::findOrFail($id);
 
-    // 3️⃣ email verification check (MOST IMPORTANT)
-    if (!$user->hasVerifiedEmail()) {
-        Auth::logout(); // 🔥 THIS WAS MISSING
+        if (!hash_equals(sha1($user->getEmailForVerification()), $hash)) {
+            abort(403, 'Invalid verification link');
+        }
 
-        return back()->with('error', 'Please verify your email before login.');
-    }
-
-    // ✅ success
-    return redirect()->route('home')
-        ->with('success', 'Login successful!');
-}
-
-
-
-
-
-/* 📧 SEND RESET LINK */
-public function sendResetLink(Request $request)
-{
-    $request->validate([
-        'email' => 'required|email',
-    ]);
-
-    $status = Password::sendResetLink(
-        $request->only('email')
-    );
-
-    return $status === Password::RESET_LINK_SENT
-        ? back()->with('success', 'Password reset link has been sent to your email.')
-        : back()->with('error', 'This email is not registered.');
-}
-
-/* 🔑 RESET FORM */
-public function resetForm(string $token)
-{
-    return view('auth.reset-password', ['token' => $token]);
-}
-
-/* 🔄 UPDATE PASSWORD */
-public function resetPassword(Request $request)
-{
-    $request->validate([
-        'token' => 'required',
-        'email' => 'required|email',
-        'password' => 'required|min:8|confirmed',
-    ]);
-
-    $status = Password::reset(
-        $request->only('email', 'password', 'password_confirmation', 'token'),
-        function ($user, $password) {
-            $user->password = Hash::make($password);
+        if (is_null($user->email_verified_at)) {
+            $user->email_verified_at = now();
+            $user->is_active = true;
             $user->save();
         }
-    );
 
-    return $status === Password::PASSWORD_RESET
-        ? redirect()->route('login')->with('success', 'Password reset successful. Please login.')
-        : back()->with('error', 'Invalid or expired reset link.');
-}
+        return redirect()->route('login')
+            ->with('success', 'Email verified successfully! You can now login.');
+    }
 
+    // -------------------------
+    // PASSWORD RESET
+    // -------------------------
+    public function sendResetLink(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+
+        $status = Password::sendResetLink($request->only('email'));
+
+        return $status === Password::RESET_LINK_SENT
+            ? back()->with('success', 'Password reset link has been sent to your email.')
+            : back()->with('error', 'This email is not registered.');
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'token' => 'required',
+            'email' => 'required|email',
+            'password' => 'required|min:8|confirmed',
+        ]);
+
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function ($user, $password) {
+                $user->password = Hash::make($password);
+                $user->save();
+            }
+        );
+
+        return $status === Password::PASSWORD_RESET
+            ? redirect()->route('login')->with('success', 'Password reset successful. Please login.')
+            : back()->with('error', 'Invalid or expired reset link.');
+    }
+
+    // -------------------------
+    // LOGOUT
+    // -------------------------
+    public function logout()
+    {
+        Auth::logout();
+        return redirect()->route('login')->with('success', 'Logged out successfully.');
+    }
 }
