@@ -61,3 +61,27 @@ Route::middleware('auth')->group(function () {
         Route::delete('/delete/{id}', [CategoryController::class, 'destroy'])->name('category.delete');
     });
 });
+
+
+    // Sub Category CRUD
+   Route::prefix('product')->middleware('auth')->group(function(){
+
+    Route::get('/{subCategory}',[ProductController::class,'index'])
+        ->name('product.index');
+
+    Route::post('/store',[ProductController::class,'store'])
+        ->name('product.store');
+
+    Route::get('/edit/{id}',[ProductController::class,'edit'])
+        ->name('product.edit');
+
+    Route::post('/update/{id}',[ProductController::class,'update'])
+        ->name('product.update');
+
+    Route::delete('/delete/{id}',[ProductController::class,'destroy'])
+        ->name('product.delete');
+});
+use App\Http\Controllers\SubCategoryController;
+
+Route::get('/get-subcategories/{id}',[SubCategoryController::class,'byCategory']);
+
