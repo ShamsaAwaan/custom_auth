@@ -8,17 +8,24 @@ use App\Models\Category;
 
 class SubCategoryController extends Controller
 {
-    public function index(Request $request)
+public function index(Request $request)
 {
     $perPage = $request->per_page ?? 10;
 
-    $subCategories = SubCategory::with('category')
-                        ->orderBy('id', 'desc')
-                        ->paginate($perPage)
-                        ->withQueryString();
+    // If you want search functionality
+    $query = SubCategory::query();
+    if ($request->search) {
+        $query->where('name', 'like', '%'.$request->search.'%');
+    }
 
-    return view('sub_category.index', compact('subCategories'));
+    $subCategories = $query->paginate($perPage)->withQueryString();
+
+    // Fetch categories for modal dropdown
+    $categories = Category::where('is_active', 1)->get();
+
+    return view('sub_category.index', compact('subCategories', 'categories'));
 }
+
 
     public function create()
     {
