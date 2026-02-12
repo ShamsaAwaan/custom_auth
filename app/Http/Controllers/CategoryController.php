@@ -2,113 +2,60 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
+use App\Models\Category;
 
 class CategoryController extends Controller
 {
     public function index()
     {
         $categories = Category::all();
-        return view('category.index', compact('categories'));
+        return view('categories.index', compact('categories'));
+    }
+
+    public function create()
+    {
+        return view('categories.create');
     }
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name'      => 'required|string|max:255',
-            'is_active' => 'required|in:0,1',
+        $request->validate([
+            'name' => 'required|unique:categories,name',
+            'slug' => 'required|unique:categories,slug',
         ]);
 
-        $validated['slug'] = Str::slug($validated['name']);
+        $data = $request->all();
+        $data['is_active'] = $request->has('is_active') ? 1 : 0;
 
-        $category = Category::create($validated);
+        Category::create($data);
 
-        if ($category) {
-            return $this->getLatestCategory(true, 'Category created successfully');
-        }
-
-        return $this->getLatestCategory(false, 'Category creation failed');
+        return redirect()->route('categories.index')->with('success', 'Category created successfully!');
     }
 
-    // ========================
-    // EDIT (FETCH DATA)
-    // ========================
-    public function edit($id)
+    public function edit(Category $category)
     {
-        $category = Category::find($id);
-
-        if (!$category) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Category not found'
-            ]);
-        }
-
-        return response()->json([
-            'success' => true,
-            'data' => $category
-        ]);
+        return view('categories.edit', compact('category'));
     }
 
-    // ========================
-    // UPDATE
-    // ========================
-    public function update(Request $request, $id)
+    public function update(Request $request, Category $category)
     {
-        $validated = $request->validate([
-            'name'      => 'required|string|max:255',
-            'is_active' => 'required|in:0,1',
+        $request->validate([
+            'name' => 'required|unique:categories,name,'.$category->id,
+            'slug' => 'required|unique:categories,slug,'.$category->id,
         ]);
 
-        $category = Category::find($id);
+        $data = $request->all();
+        $data['is_active'] = $request->has('is_active') ? 1 : 0;
 
-        if (!$category) {
-            return $this->getLatestCategory(false, 'Category not found');
-        }
+        $category->update($data);
 
-        $validated['slug'] = Str::slug($validated['name']);
-
-        $category->update($validated);
-
-        return $this->getLatestCategory(true, 'Category updated successfully');
+        return redirect()->route('categories.index')->with('success', 'Category updated successfully!');
     }
 
-    // ========================
-    // DELETE
-    // ========================
-    public function destroy($id)
+    public function destroy(Category $category)
     {
-        $category = Category::find($id);
-
-        if (!$category) {
-            return $this->getLatestCategory(false, 'Category not found');
-        }
-
         $category->delete();
-
-        return $this->getLatestCategory(true, 'Category deleted successfully');
-    }
-
-    // ========================
-    // REFRESH TABLE
-    // ========================
-    private function getLatestCategory(
-        $success = true,
-        $message = 'Success!',
-        $html = null
-    ) {
-        $categories = Category::all();
-
-        if ($html === null) {
-            $html = view('category.data-table', compact('categories'))->render();
-        }
-
-        return response()->json([
-            'success' => $success,
-            'message' => $message,
-            'html'    => $html
-        ]);
+        return redirect()->route('categories.index')->with('success', 'Category deleted successfully!');
     }
 }

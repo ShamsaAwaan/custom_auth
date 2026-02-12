@@ -85,22 +85,20 @@
               <ul class="menu-sub">
                 <li class="menu-item">
                     <li class="menu-item">
-                        <a href="{{ route('category.index') }}" class="menu-link">
+                        <a href="{{ route('categories.index') }}" class="menu-link">
                           <div data-i18n="Category">Category</div>
                         </a>
                       </li>
-                      <li class="menu-item">
-                        <a href="" class="menu-link">
-                          <div data-i18n="Sub Category">Sub Category</div>
-                        </a>
-                      </li>
-                      <li class="menu-item">
-                        <a href="" class="menu-link">
-                          <div data-i18n="Product">Product</div>
-                        </a>
-                      </li>
-                  </li>
-                </ul>
+                      <!-- Sub Category -->
+<a href="{{ route('sub_category.index') }}" class="menu-link">
+    <div data-i18n="Sub Category">Sub Category</div>
+</a>
+
+<!-- Product -->
+<a href="{{ route('products.index') }}" class="menu-link">
+    <div data-i18n="Product">Product</div>
+</a>
+
             </li>
         </ul>
             <!-- Dashboards -->

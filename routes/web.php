@@ -5,6 +5,8 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Models\User;
 
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\SubCategoryController;
 // ----------------------
 // Public Routes
 // ----------------------
@@ -39,49 +41,20 @@ Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])
     ->middleware('signed')
     ->name('verification.verify');
 
-// ----------------------
-// Protected Routes (Auth Only)
-// ----------------------
-Route::middleware('auth')->group(function () {
+
 
     // User Profile
     Route::get('/profile', [AuthController::class, 'profile'])->name('profile');
 
-    // Category CRUD (prefix + group)
-    Route::prefix('category')->group(function () {
 
-        Route::get('/', [CategoryController::class, 'index'])->name('category.index');
+// Category CRUD
+Route::resource('categories', CategoryController::class);
 
-        Route::post('/store', [CategoryController::class, 'store'])->name('category.store');
+// SubCategory CRUD
+Route::resource('sub_category', SubCategoryController::class);
 
-        Route::get('/edit/{id}', [CategoryController::class, 'edit'])->name('category.edit');
+// Product CRUD
+Route::resource('products', ProductController::class);
 
-        Route::post('/update/{id}', [CategoryController::class, 'update'])->name('category.update');
-
-        Route::delete('/delete/{id}', [CategoryController::class, 'destroy'])->name('category.delete');
-    });
-});
-
-
-    // Sub Category CRUD
-   Route::prefix('product')->middleware('auth')->group(function(){
-
-    Route::get('/{subCategory}',[ProductController::class,'index'])
-        ->name('product.index');
-
-    Route::post('/store',[ProductController::class,'store'])
-        ->name('product.store');
-
-    Route::get('/edit/{id}',[ProductController::class,'edit'])
-        ->name('product.edit');
-
-    Route::post('/update/{id}',[ProductController::class,'update'])
-        ->name('product.update');
-
-    Route::delete('/delete/{id}',[ProductController::class,'destroy'])
-        ->name('product.delete');
-});
-use App\Http\Controllers\SubCategoryController;
-
-Route::get('/get-subcategories/{id}',[SubCategoryController::class,'byCategory']);
-
+// AJAX route to get subcategories dynamically
+Route::get('/get-subcategories/{categoryId}', [ProductController::class, 'getSubCategories']);

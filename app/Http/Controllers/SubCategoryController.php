@@ -2,105 +2,65 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
-use App\Models\SubCategory;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
+use App\Models\SubCategory;
+use App\Models\Category;
 
 class SubCategoryController extends Controller
 {
-    // ========================
-    // List Sub Categories
-    // ========================
-    public function index(Category $category)
+    public function index()
     {
-        $subCategories = $category->subCategories;
-
-        return view('sub-category.index', compact('category', 'subCategories'));
+        $subCategories = SubCategory::with('category')->get();
+        return view('sub_category.index', compact('subCategories'));
     }
 
-    // ========================
-    // Store
-    // ========================
+    public function create()
+    {
+        $categories = Category::all();
+        return view('sub_category.create', compact('categories'));
+    }
+
     public function store(Request $request)
     {
         $request->validate([
-            'category_id' => 'required|exists:categories,id',
-            'name'        => 'required|string|max:255',
-            'is_active'   => 'required|in:0,1',
+            'name' => 'required|unique:sub_categories,name',
+            'slug' => 'required|unique:sub_categories,slug',
+            'category_id' => 'required|exists:categories,id'
         ]);
 
-        SubCategory::create([
-            'category_id' => $request->category_id,
-            'name'        => $request->name,
-            'slug'        => Str::slug($request->name),
-            'is_active'   => $request->is_active,
+        $data = $request->all();
+        $data['is_active'] = $request->has('is_active') ? 1 : 0;
+
+        SubCategory::create($data);
+
+        return redirect()->route('sub_category.index')->with('success', 'Sub Category created successfully!');
+    }
+
+    public function edit(SubCategory $subCategory)
+    {
+        $categories = Category::all();
+        return view('sub_category.edit', compact('subCategory', 'categories'));
+    }
+
+    public function update(Request $request, SubCategory $subCategory)
+    {
+        $request->validate([
+            'name' => 'required|unique:sub_categories,name,'.$subCategory->id,
+            'slug' => 'required|unique:sub_categories,slug,'.$subCategory->id,
+            'category_id' => 'required|exists:categories,id'
         ]);
 
-        return $this->latest(true, 'Sub Category Created');
+        $data = $request->all();
+        $data['is_active'] = $request->has('is_active') ? 1 : 0;
+
+        $subCategory->update($data);
+
+        return redirect()->route('sub_category.index')->with('success', 'Sub Category updated successfully!');
     }
 
-    // ========================
-    // Edit
-    // ========================
-    public function edit($id)
+    public function destroy(SubCategory $subCategory)
     {
-        return response()->json([
-            'success' => true,
-            'data'    => SubCategory::findOrFail($id),
-        ]);
-    }
-
-    // ========================
-    // Update
-    // ========================
-    public function update(Request $request, $id)
-    {
-        $sub = SubCategory::findOrFail($id);
-
-        $sub->update([
-            'name'      => $request->name,
-            'slug'      => Str::slug($request->name),
-            'is_active' => $request->is_active,
-        ]);
-
-        return $this->latest(true, 'Updated Successfully');
-    }
-
-    // ========================
-    // Delete
-    // ========================
-    public function destroy($id)
-    {
-        SubCategory::findOrFail($id)->delete();
-
-        return $this->latest(true, 'Deleted');
-    }
-
-    // ========================
-    // Ajax Refresh Table
-    // ========================
-    private function latest($success, $message)
-    {
-        $subCategories = SubCategory::where(
-            'category_id',
-            request('category_id')
-        )->get();
-
-        $html = view('sub-category.data-table', compact('subCategories'))->render();
-
-        return response()->json(compact('success', 'message', 'html'));
-    }
-
-    // ========================
-    // Fetch By Category (Dropdown)
-    // ========================
-    public function byCategory($id)
-    {
-        $subs = SubCategory::where('category_id', $id)->get();
-
-        return response()->json([
-            'html' => view('partials.sub-options', compact('subs'))->render(),
-        ]);
+        $subCategory->delete();
+        return redirect()->route('sub_category.index')->with('success', 'Sub Category deleted successfully!');
     }
 }
