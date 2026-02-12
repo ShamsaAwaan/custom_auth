@@ -10,24 +10,28 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-    {
-        Schema::create('products', function (Blueprint $table) {
-    $table->id();
+{
+    Schema::create('products', function (Blueprint $table) {
+        $table->id();
 
-    $table->foreignId('sub_category_id')
-          ->constrained()
-          ->cascadeOnDelete();
+        $table->string('name');
+        $table->string('sku')->unique();
 
-    $table->string('name');
-    $table->string('slug')->unique();
-    $table->decimal('price',10,2);
-    $table->text('description')->nullable();
-    $table->boolean('is_active')->default(1);
+        $table->foreignId('category_id')->constrained()->onDelete('cascade');
+        $table->foreignId('sub_category_id')->constrained()->onDelete('cascade');
 
-    $table->timestamps();
-});
+        $table->decimal('cost', 10, 2);
+        $table->decimal('price', 10, 2);
 
-    }
+        $table->integer('quantity')->default(0);
+
+        $table->string('image')->nullable();
+
+        $table->boolean('is_active')->default(1);
+
+        $table->timestamps();
+    });
+}
 
     /**
      * Reverse the migrations.

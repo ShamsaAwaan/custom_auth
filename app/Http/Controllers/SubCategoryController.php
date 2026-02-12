@@ -8,11 +8,17 @@ use App\Models\Category;
 
 class SubCategoryController extends Controller
 {
-    public function index()
-    {
-        $subCategories = SubCategory::with('category')->get();
-        return view('sub_category.index', compact('subCategories'));
-    }
+    public function index(Request $request)
+{
+    $perPage = $request->per_page ?? 10;
+
+    $subCategories = SubCategory::with('category')
+                        ->orderBy('id', 'desc')
+                        ->paginate($perPage)
+                        ->withQueryString();
+
+    return view('sub_category.index', compact('subCategories'));
+}
 
     public function create()
     {

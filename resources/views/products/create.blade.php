@@ -74,18 +74,27 @@
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <script>
-    $('#category').change(function() {
+$(document).ready(function(){
+
+    $('#category').on('change', function(){
         var categoryId = $(this).val();
-        if(categoryId) {
+
+        if(categoryId){
             $.ajax({
-                url: '/get-subcategories/' + categoryId,
-                type: 'GET',
-                success: function(data) {
+                url: "{{ url('/get-subcategories') }}/" + categoryId,
+                type: "GET",
+                dataType: "json",
+                success: function(data){
+
                     $('#sub_category').empty();
                     $('#sub_category').append('<option value="">Select Sub Category</option>');
-                    $.each(data, function(key, value) {
-                        $('#sub_category').append('<option value="'+value.id+'">'+value.name+'</option>');
+
+                    $.each(data, function(key, value){
+                        $('#sub_category').append(
+                            '<option value="'+ value.id +'">'+ value.name +'</option>'
+                        );
                     });
                 }
             });
@@ -93,5 +102,8 @@
             $('#sub_category').empty();
         }
     });
+
+});
 </script>
+
 @endsection

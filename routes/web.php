@@ -58,3 +58,4 @@ Route::resource('products', ProductController::class);
 
 // AJAX route to get subcategories dynamically
 Route::get('/get-subcategories/{categoryId}', [ProductController::class, 'getSubCategories']);
+Route::get('/get-subcategories/{categoryId}', [ProductController::class, 'getSubCategories'])->name('get.subcategories');

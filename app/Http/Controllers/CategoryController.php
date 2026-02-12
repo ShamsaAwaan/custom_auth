@@ -7,11 +7,25 @@ use App\Models\Category;
 
 class CategoryController extends Controller
 {
-    public function index()
-    {
-        $categories = Category::all();
-        return view('categories.index', compact('categories'));
+    public function index(Request $request)
+{
+    $perPage = $request->per_page ?? 10;
+    $search = $request->search;
+
+    $query = Category::query();
+
+    if($search){
+        $query->where('name', 'like', "%{$search}%")
+              ->orWhere('slug', 'like', "%{$search}%");
     }
+
+    $categories = $query->orderBy('id', 'desc')
+                        ->paginate($perPage)
+                        ->withQueryString(); // keeps search and per_page
+
+    return view('categories.index', compact('categories', 'search'));
+}
+
 
     public function create()
     {
